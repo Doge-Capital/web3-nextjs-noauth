@@ -1,44 +1,47 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { clusterApiUrl } from '@solana/web3.js';
-import { useMemo } from 'react';
-import { LedgerWalletAdapter, PhantomWalletAdapter, SlopeWalletAdapter, SolflareWalletAdapter, SolletExtensionWalletAdapter, SolletWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { SessionProvider } from 'next-auth/react';
-import { Toaster } from 'react-hot-toast';
+import "../styles/globals.css";
 
-require('@solana/wallet-adapter-react-ui/styles.css');
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import {
+  LedgerWalletAdapter,
+  SolflareWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
+import { Toaster } from "react-hot-toast";
+import Navbar from "../components/Navbar";
+import { ThemeProvider } from "../components/theme-provider";
 
-export default function App({ Component, pageProps }: AppProps) {
+require("@solana/wallet-adapter-react-ui/styles.css");
 
-  const network = WalletAdapterNetwork.Mainnet;
-
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const wallets = useMemo(
-    () => [
-      new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
-      new SlopeWalletAdapter(),
-      new LedgerWalletAdapter(),
-      new SolletWalletAdapter({ network }),
-      new SolletExtensionWalletAdapter({ network }),
-    ],
-    [network]
-  );
-
+function MyApp({ Component, pageProps: { session, ...pageProps } }: any) {
+  const endpoint = process.env.NEXT_PUBLIC_RPC!;
+  const wallets = [new SolflareWalletAdapter(), new LedgerWalletAdapter()];
 
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <SessionProvider>
-            <Toaster/>
-            <Component {...pageProps} />
-          </SessionProvider>
+          {/* <Maintanance/> */}
+
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <Navbar />
+                <Component {...pageProps} />
+                <Toaster />
+              </ThemeProvider>
+              {/* <div className="mt-[33vh] text-center text-3xl text-white">
+                Under Maintenance for fixing bugs ! Will be back in a few hours!
+              </div> */}
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );
 }
+
+export default MyApp;
